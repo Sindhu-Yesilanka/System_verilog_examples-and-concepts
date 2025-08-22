@@ -1,0 +1,25 @@
+module dynamic_array;
+ //Declare a dynamic array of integers
+  int D1[];
+  initial begin
+    // a. Allocate memory for 10 values
+    D1 = new[10];
+    $display("Allocated dynamic array with 10 elements.\n");
+    // b. Initialize with random values (0 to 100)
+    foreach (D1[i])
+      D1[i] = $urandom_range(0, 100);
+    $display("Initial 10 random values:");
+    foreach (D1[i])
+      $display("D1[%0d] = %0d", i, D1[i]);
+    // c. Resize the array to 20 and preserves the first 10 values
+    D1 = new[20](D1); // copy the old array 
+    $display("\nResized array to 20. First 10 values are preserved.\n");
+    // Fill the remaining 10 values with random data
+    for (int i = 10; i < 20; i++)
+      D1[i] = $urandom_range(0, 100);
+    // d. Display all 20 values
+    $display("All 20 values in dynamic array:");
+    foreach (D1[i])
+      $display("D1[%0d] = %0d", i, D1[i]);
+  end
+endmodule

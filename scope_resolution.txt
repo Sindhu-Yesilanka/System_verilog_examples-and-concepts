@@ -1,0 +1,14 @@
+// Outer class: eth_pkt
+class eth_pkt;
+  // Inner class: m_pkt
+  class m_pkt;
+    static int count = 42; // Static variable shared across all m_pkt instances
+  endclass
+endclass
+// Top module to test
+module top;
+  initial begin
+    // Accessing static variable without using handle just using scope resolution operator
+    $display("Static count from nested class: %0d", eth_pkt::m_pkt::count);
+  end
+endmodule

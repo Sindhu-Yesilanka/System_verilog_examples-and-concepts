@@ -1,0 +1,98 @@
+// Class: eth_pkt — Models an Ethernet Packet
+class eth_pkt;
+  // Static field to count total packets created (shared across all objects not single object)
+  static int count;
+  // Randomizable fields
+  rand bit [47:0] da;           // Destination MAC address
+  rand int unsigned len;        // Payload length
+  rand byte payload[];          // Actual data (dynamic array or queue for flexibility)
+  // CRC is calculated from payload, not random
+  bit [31:0] crc;
+  // Constraint to prevent large payload sizes that can consume too much memory
+  constraint payload_c {
+    len inside {[10:50]};       // Max 50 bytes actual it can be of 46-1500 bytes
+  }
+  // Constructor to increment packet count
+  function new();
+    count++;
+  endfunction
+  // Method to calculate CRC
+  function compute_crc();
+    crc = calculate_crc32(payload);//if crc==calculated crc then ther is no error in payload
+  endfunction  
+  function void print();
+    $display("\n========== Ethernet Packet ==========");
+    $display("Packet #%0d", count);
+    $display("Destination Address : %0h", da);
+    $display("Payload Length      : %0d", len);
+    $display("CRC (checksum)      : %0h", crc);
+    $display("First 10 Payload Bytes:");
+    foreach (payload[i])
+      begin
+      if (i < 10)
+        $write("%02h ", payload[i]);
+    end
+    $display("\n=====================================\n");
+  endfunction
+
+endclass
+// Function: calculate_crc32 —to  Computes CRC for payload
+function bit [31:0] calculate_crc32(input byte data_array[]);
+  bit [31:0] crc = 32'hFFFFFFFF;
+  bit [31:0] POLY = 32'h04C11DB7;//polynomial divisor to calculate crc
+  bit [7:0] byte_data;
+  int i, j;
+  for (i = 0; i < data_array.size(); i++) begin
+    byte_data = data_array[i];
+    crc ^= (byte_data << 24);
+    for (j = 0; j < 8; j++)
+      begin
+      if (crc[31])
+        crc = (crc << 1) ^ POLY;//if MSB =1 then xor with divisor
+      else
+        crc = (crc << 1);//MSB=0 just shifting
+    end
+  end
+  return ~crc;//flip the final one
+endfunction
+
+//  2. Instantiate eth_pkt inside module top
+//  a.Write $display to display contents of eth_pkt
+//  b.List down disadvantages of $display to print pkt
+//  c.Randomize pkt
+//  d.Declare a method print to display the contents of eth_pkt
+//=========================================================
+// Module: top — Instantiates and tests eth_pkt
+//=========================================================
+module top;
+
+  eth_pkt pkt;
+
+  initial begin
+    // Create a new packet
+    pkt = new();
+
+    // Randomize the packet fields (da, len, payload)
+    if (!pkt.randomize()) begin
+      $display("Randomization failed.");
+      $finish;
+    end
+    // Allocate memory to payload based on randomized len
+    pkt.payload = new[pkt.len];
+    // Fill each byte in payload with random data (0–255)
+    foreach (pkt.payload[i])
+      pkt.payload[i] = $urandom_range(0, 255);
+    // Compute CRC based on the filled payload
+    pkt.compute_crc();
+    // Display packet using custom print method
+    pkt.print();
+/*Why not use $display() everywhere?
+  - Too many $display lines make the code look messy.
+  - If we change a field later, we have to change all $display statements too.
+  - Printing arrays like payload using $display is hard to manage.
+  - It's easier and cleaner to use a print() method inside the class.
+*/
+
+  end
+
+endmodule

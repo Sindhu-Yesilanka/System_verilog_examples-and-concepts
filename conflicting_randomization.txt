@@ -1,0 +1,28 @@
+class eth_pkt;
+  rand bit [7:0] sof;
+  rand int unsigned len;
+  rand byte payload[];
+  // Conflicting constraints
+  constraint conflict1 { payload.size() < 40; }   // Less than 40
+  constraint conflict2 { payload.size() > 50; }   // Greater than 50 hence no common values i.e opposite in direction
+  function void print();
+    $display("\n=== Ethernet Packet ===");
+    $display("SOF         : %0h", sof);
+    $display("Length      : %0d", len);
+    $display("Payload Size: %0d", payload.size());
+    $write("Payload     : ");
+    foreach (payload[i])
+      $write("%02h ", payload[i]);
+    $display("\n=======================\n");
+  endfunction
+endclass
+module top;
+  eth_pkt pkt;
+  initial begin
+    pkt = new();
+    // Force assertion to check randomization success
+    assert(pkt.randomize())
+      else $fatal("Randomization failed due to conflicting constraints");
+    pkt.print();
+  end
+endmodule

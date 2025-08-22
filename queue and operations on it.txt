@@ -1,0 +1,35 @@
+ module queue;
+  // Declare an unbounded queue of integers
+   int Q1[$];//more flexible
+   int front_val,temp;
+  initial begin
+    // a. Initialize the Queue with 6 different values
+    Q1 = {10, 20, 30, 40, 50, 60};
+    $display("Initial Queue: %p\n", Q1);
+
+    // b. Push a value from back Without using built-in method is by inserting or concentation at end
+    Q1 = {Q1, 70};  // Add 70 at the end by concatenation
+    $display("After manual push back of 70: %p\n", Q1);
+
+    // Push another value manually
+    Q1 = {Q1, 80};
+    $display("After manual push back of 80: %p\n", Q1);
+
+    // c. Extract value from 0th location (front of queue)
+    front_val = Q1[0];
+    $display("Value at 0th position: %0d\n", front_val);
+
+    // d. Insert a value at any location (say index 2)
+    Q1.insert(2, front_val);  // Insert 25 at index 2
+    $display("After inserting 0th index value at index 2: %p\n", Q1);
+
+    // e. Write logic to make queue behave as FIFO (First-In-First-Out)
+    $display("FIFO simulation — removing elements one-by-one:\n");
+    while (Q1.size() > 0) 
+      begin
+      temp = Q1.pop_front();  // Remove from front
+      $display("Popped: %0d | Remaining Queue: %p", temp, Q1);
+    end
+  end
+
+endmodule

@@ -1,0 +1,56 @@
+class eth_pkt;
+  bit [7:0] sof;       // Start of Frame
+  bit [15:0] len;        // Payload length
+  int count;         // Packet count
+  function new(); // Constructor
+    sof = 8'hA      // Example value
+    len = 16'd64;   // Default length
+    count = 0;
+  endfunction
+  // Method to print parent class fields
+  function void print();
+    $display("=== Base Class: eth_pkt ===");
+    $display("SOF   : %0h", sof);
+    $display("Length: %0d", len);
+    $display("Count : %0d", count);
+  endfunction
+endclass
+// eth_good_pkt.sv — Derived class from eth_pkt
+class eth_good_pkt extends eth_pkt;
+  // ii. New field in child class
+  int count_good;
+  function new();
+    super.new();           // Call base constructor
+    count_good = 10;
+  endfunction
+  // iii. print() using super.print (REUSABLE way)
+  function void print();
+    $display("\n=== Derived Class: eth_good_pkt (With super.print) ===");
+    super.print();         // Reuse base class print
+    $display("COUNT_GOOD : %0d", count_good);
+  endfunction
+  // Manual version — print without super.print
+  function void print_manual();
+    $display("\n=== Derived Class: eth_good_pkt (Manual using this/super) ===");
+    $display("SOF         : %0h", super.sof);// super refers to parent class
+    $display("LEN         : %0d", super.len);
+    $display("COUNT       : %0d", super.count);
+    $display("COUNT_GOOD  : %0d", this.count_good); // this refers to current class
+  endfunction
+endclass
+module top;
+  initial begin
+    // Instantiate derived class object
+    eth_good_pkt pkt;
+    pkt = new();
+    // Optional: change some values
+    pkt.len        = 128;
+    pkt.count      = 2;
+    pkt.count_good = 5;
+    // Print using super.print
+    pkt.print();
+    // Print without using super.print
+    pkt.print_manual();
+  end
+endmodule
+
